@@ -88,6 +88,7 @@ class Game {
   private _score = 0;
 
   // class & method
+  // change test
 
   public constructor(selector: string) {
     this._canvas = document.querySelector(selector) as HTMLCanvasElement;
