@@ -2,6 +2,8 @@ class Game {
   private readonly _canvas: HTMLCanvasElement;
   private readonly _ctx: CanvasRenderingContext2D;
 
+  // initialize game parameters
+
   private _COLORS = [
     'black',
     'orange',
@@ -78,12 +80,14 @@ class Game {
   private _currentX = 0;
   private _currentY = 0;
   private _currentBlockIndex;
-  private _nextBlockIndexes = [];
+  private _nextBlockIndex = [];
   private _currentSchema;
   private _timeBefore = 0;
   private _timeAfter = 0;
   private _stoper = 0;
   private _score = 0;
+
+  // class & method
 
   public constructor(selector: string) {
     this._canvas = document.querySelector(selector) as HTMLCanvasElement;
@@ -99,6 +103,7 @@ class Game {
     this.checkLines = this.checkLines.bind(this);
   }
 
+  // いわゆるエントリポイント　即ちmain(){};
   public run() {
     window.addEventListener('keydown', this.onPressKeyboard, false);
 
@@ -107,6 +112,7 @@ class Game {
     this.update();
   }
 
+  // 組み込み関数とか
   private update() {
     this._timeBefore = performance.now();
     this._stoper += this._timeBefore - this._timeAfter;
@@ -124,7 +130,7 @@ class Game {
     this.checkLines();
 
     this.render();
-    requestAnimationFrame(this.update);
+    requestAnimationFrame(this.update); // vsyncが組み込み関数で存在するとかドン引き……
     this._timeAfter = performance.now();
   }
 
@@ -151,7 +157,6 @@ class Game {
         );
       }
     }
-
     for (let y = 0; y < this._currentSchema.length; y++) {
       for (let x = 0; x < this._currentSchema[y].length; x++) {
         if (this._currentSchema[y][x] === 1) {
@@ -163,23 +168,22 @@ class Game {
         }
       }
     }
-
-    for (let i = 0; i < this._nextBlockIndexes.length; i++) {
+    for (let i = 0; i < this._nextBlockIndex.length; i++) {
       for (
         let y = 0;
-        y < this._TETROMINOS[this._nextBlockIndexes[i]].schema.length;
+        y < this._TETROMINOS[this._nextBlockIndex[i]].schema.length;
         y++
       ) {
         for (
           let x = 0;
-          x < this._TETROMINOS[this._nextBlockIndexes[i]].schema[y].length;
+          x < this._TETROMINOS[this._nextBlockIndex[i]].schema[y].length;
           x++
         ) {
-          if (this._TETROMINOS[this._nextBlockIndexes[i]].schema[y][x] === 1) {
+          if (this._TETROMINOS[this._nextBlockIndex[i]].schema[y][x] === 1) {
             this.drawBlock(
               (x + this._WIDTH) * this._BLOCK_SIZE + 32,
               y * this._BLOCK_SIZE + (i + 1) * 128,
-              this._COLORS[this._TETROMINOS[this._nextBlockIndexes[i]].color]
+              this._COLORS[this._TETROMINOS[this._nextBlockIndex[i]].color]
             );
           }
         }
@@ -225,7 +229,6 @@ class Game {
         }
       }
     }
-
     return false;
   }
 
@@ -278,19 +281,19 @@ class Game {
   }
 
   private getNewBlock() {
-    if (this._nextBlockIndexes.length === 0) {
+    if (this._nextBlockIndex.length === 0) {
       for (let i = 0; i < this._NEXT_BLOCKS; i++) {
-        this._nextBlockIndexes.push(
+        this._nextBlockIndex.push(
           Math.floor(Math.random() * (this._TETROMINOS.length - 0.5))
         );
       }
     }
-    this._currentBlockIndex = this._nextBlockIndexes[0];
+    this._currentBlockIndex = this._nextBlockIndex[0];
     this._currentSchema = Game.copy(
       this._TETROMINOS[this._currentBlockIndex].schema
     );
-    this._nextBlockIndexes.shift();
-    this._nextBlockIndexes.push(
+    this._nextBlockIndex.shift();
+    this._nextBlockIndex.push(
       Math.floor(Math.random() * (this._TETROMINOS.length - 0.5))
     );
 
@@ -315,7 +318,6 @@ class Game {
         newArray[y].push(0);
       }
     }
-
     return newArray;
   }
 
@@ -331,6 +333,7 @@ class Game {
     const M = arr.length;
     const N = arr[0].length;
 
+    // 回転後の配列情報を生成し、空で埋める
     for (let y = 0; y < N; y++) {
       transformedArray.push([]);
       for (let x = 0; x < M; x++) {
@@ -338,29 +341,28 @@ class Game {
       }
     }
 
+    //　回転後の配列情報に、回転前の配列情報を差し込む
     for (let y = 0; y < M; y++) {
       for (let x = 0; x < N; x++) {
         transformedArray[x][M - 1 - y] = arr[y][x];
       }
     }
-
     return transformedArray;
   }
 
   private checkLines() {
     let linesToShift = [];
     for (let y = this._HEIGHT - 1; y > 0; y--) {
-      let blocksInRow = 0;
+      let blockInRow = 0;
       for (let x = 0; x < this._WIDTH; x++) {
         if (this._landed[y][x] !== 0) {
-          blocksInRow++;
+          blockInRow++;
         }
       }
-      if (blocksInRow === this._WIDTH) {
+      if (blockInRow === this._WIDTH) {
         linesToShift.push(y);
       }
     }
-
     switch (linesToShift.length) {
       case 0:
         break;

@@ -40,7 +40,7 @@ class Game {
             {
                 name: 'I',
                 color: 4,
-                shema: [[1, 1, 1, 1]],
+                schema: [[1, 1, 1, 1]],
             },
             {
                 name: 'Z',
@@ -62,7 +62,7 @@ class Game {
                 name: 'T',
                 color: 7,
                 schema: [
-                    [0, 1, 1],
+                    [0, 1, 0],
                     [1, 1, 1],
                 ],
             },
@@ -133,6 +133,15 @@ class Game {
                 }
             }
         }
+        for (let i = 0; i < this._nextBlockIndex.length; i++) {
+            for (let y = 0; y < this._TETROMINOS[this._nextBlockIndex[i]].schema.length; y++) {
+                for (let x = 0; x < this._TETROMINOS[this._nextBlockIndex[i]].schema[y].length; x++) {
+                    if (this._TETROMINOS[this._nextBlockIndex[i]].schema[y][x] === 1) {
+                        this.drawBlock((x + this._WIDTH) * this._BLOCK_SIZE + 32, y * this._BLOCK_SIZE + (i + 1) * 128, this._COLORS[this._TETROMINOS[this._nextBlockIndex[i]].color]);
+                    }
+                }
+            }
+        }
         ctx.font = '26px sans-serif';
         ctx.fillStyle = '#ffffff';
         ctx.fillText(`Score: ${this._score}`, (this._WIDTH + 1) * this._BLOCK_SIZE, 64);
@@ -171,7 +180,7 @@ class Game {
     }
     onPressKeyboard(event) {
         switch (event.code) {
-            case 'ArrowUP':
+            case 'ArrowUp':
                 const newSchema = Game.rotateClockwise(this._currentSchema);
                 if (!this.checkCollision(newSchema, 0, 0) &&
                     !this.checkCollision(newSchema, 0, 1)) {
@@ -194,7 +203,7 @@ class Game {
                     this._stoper = 0;
                 }
                 break;
-            case 'Spase':
+            case 'Space':
                 while (!this.checkCollision(this._currentSchema, 0, 1)) {
                     this._currentY += 1;
                     this._stoper = 0;
@@ -238,7 +247,7 @@ class Game {
         // 回転後の配列情報を生成し、空で埋める
         for (let y = 0; y < N; y++) {
             transformedArray.push([]);
-            for (let x = 0; x < N; x++) {
+            for (let x = 0; x < M; x++) {
                 transformedArray[y].push([]);
             }
         }
@@ -282,15 +291,16 @@ class Game {
                 this._score += 800 + 400 * linesToShift.length;
                 break;
         }
-        for (const line of linesToShift)
+        for (const line of linesToShift) {
             this.shiftLines(line);
+        }
     }
     shiftLines(line) {
         for (let y = line; y > 0; y--) {
             if (line === 0) {
                 this._landed[y][0] = 0;
             }
-            for (let x; x < this._WIDTH; x++) {
+            for (let x = 0; x < this._WIDTH; x++) {
                 this._landed[y][x] = this._landed[y - 1][x];
             }
         }
